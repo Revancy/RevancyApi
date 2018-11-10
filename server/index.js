@@ -1,9 +1,5 @@
 import 'babel-polyfill'
-import config from './config'
 import express from 'express'
+import Server from './server'
 
-let app = express()
-
-app.listen(config.port, () => {
-    console.log(`Application is running on port: http://localhost:${config.port}`)
-})
+let server = new Server(express)
