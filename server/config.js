@@ -12,6 +12,7 @@ const config = {
     port: process.env.DB_PORT || 27017,
     name: process.env.DB_NAME || 'test',
     options: {
+      useNewUrlParser: true,
       keepAlive: 120
     }
   }
