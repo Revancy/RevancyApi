@@ -1,5 +1,6 @@
 import config from './config'
 import cors from 'cors'
+import cryptojs from 'crypto-js'
 import jwt from 'jsonwebtoken'
 
 export default class Server {
@@ -27,7 +28,12 @@ export default class Server {
     })
 
     this.router.post('/login', (req, res) => {
+      console.log(req.body) //used for debugging, delete it in end
+      // this is used for decrepting password
+      // let bytes = cryptojs.AES.decrypt(req.body.password, 'secret key 123')
+      // let decreptedPassword = bytes.toString(cryptojs.enc.Utf8)
       let token = jwt.sign(req.body, 'com.revancy.api')
+
       this.users[token] = req.body
       res.send({
         token: token
