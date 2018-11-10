@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 
 let messageSchema = new mongoose.Schema({
+  id: { type: Number, required: true },
   fromName: { type: String, trim: true },
   fromMail: { type: String, trim: true },
   subject: { type: String, trim: true },
