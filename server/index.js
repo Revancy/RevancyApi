@@ -5,7 +5,7 @@ import Server from './server'
 
 new Server(express)
 
-new Imap('grupafaf151@gmail.com', 'GRUPAFAF151ABCD').getInbox(1)
-         .then(messages => {
-           console.log(messages);
-         })
+new Imap('grupafaf151@gmail.com', 'GRUPAFAF151ABCD').getInboxHeaders(1)
+  .then(messages => {
+    console.log(messages)
+  })

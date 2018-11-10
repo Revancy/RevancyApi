@@ -1,11 +1,17 @@
 import imap from 'imap'
-import util from 'util'
 import mailParser from 'mailparser'
+
+const FETCH = {
+  headers: 'HEADER.FIELDS (TO FROM SUBJECT DATE)',
+  messages: 'TEXT'
+}
 
 export default class Imap {
   constructor(user, password, host = 'imap.gmail.com') {
+
     this.simpleParser = mailParser.simpleParser
 
+    this.mailsParsers = []
     this.imap = new imap({
       user: user,
       password: password,
@@ -13,12 +19,6 @@ export default class Imap {
       port: 993,
       tls: true
     })
-
-    this.imap.connect()
-
-    this.imap.once('ready', () => {
-      console.log('Imap Connection Ready')
-      this.imapRequest()})
 
     this.imap.once('error', (err) => {
       console.log(err)
@@ -29,43 +29,65 @@ export default class Imap {
     })
   }
 
-  getInbox(page) {
-    return new Promise((resolve, reject) => {
-      this.imapRequest = () => {
-        let mailsParsers = []
-        let inspect = util.inspect
-        this.imap.openBox('INBOX', true, (err, box) => {
-          if (err) throw err
-          let start = box.messages.total - 1 * 10
-          var f = this.imap.seq.fetch(start + ':' + (start * 10) , {
-            bodies: 'HEADER.FIELDS (TO FROM SUBJECT DATE)'
-          })
-          f.on('message', (msg, seqno) => {
-            console.log('Message #%d', seqno)
-            var prefix = '(#' + seqno + ') '
-            msg.on('body', (stream, info) => {
-              mailsParsers.push(this.simpleParser(stream))
-            })
-            msg.once('attributes', (attrs) => {
-              //console.log(attrs)
-            })
-            msg.once('end', () => {
-              console.log(prefix + 'Finished')
-            })
-          })
-          f.once('error', (err) => {
-            console.log('Fetch error: ' + err)
-          })
-          f.once('end', () => {
-            console.log('Done fetching all messages!')
-            Promise.all(mailsParsers).then(mails => {
-              console.log('******* All parsed ********');
-              resolve(mails)
-            })
-            this.imap.end()
-          })
-        })
+  connect() {
+    this.imap.connect()
+    return Promise(resolve => {
+      this.imap.once('ready', () => {
+        console.log('Imap Connection Ready')
+        resolve(this)
+      })
+    })
+  }
+
+  getInboxData(page, type) {
+    this.imap.openBox('INBOX', true, (err, box) => {
+      if (err) throw err
+      const perPage = 50
+      let start = box.messages.total - (page  * perPage)
+      this.inboxFetch = this.imap.seq.fetch(start + ':' + (start + perPage) , {
+        bodies: type
+      })
+
+      this.inboxFetch.on('message', this.onFetchMessage.bind(this))
+
+      this.inboxFetch.once('error', this.onError.bind(this))
+
+      this.inboxFetch.once('end', this.onFetchEnd.bind(this))
+
+    })
+  }
+
+  onFetchMessage(msg, seqno) {
+    console.log('Message #%d', seqno)
+    var prefix = '(#' + seqno + ') '
+    msg.on('body', stream => {
+      this.mailsParsers.push(this.simpleParser(stream))
+    })
+    msg.once('end', () => {
+      console.log(prefix + 'Finished')
+    })
+  }
+
+  onFetchEnd() {
+    Promise.all(this.mailsParsers).then(mails => {
+      console.log('******* All parsed ********')
+      this.resolveFetch(mails)
+    })
+    this.imap.end()
+  }
+
+  onError(error) {
+    console.log('Imap error: ' + error)
+  }
+
+  getInboxHeaders(page) {
+    this.getInboxData(page, FETCH.headers)
+    return new Promise(resolve => {
+      this.resolveFetch = (mails) => {
+        resolve(mails)
       }
     })
   }
+
+
 }
