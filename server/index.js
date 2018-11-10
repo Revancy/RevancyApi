@@ -5,5 +5,5 @@ import express from 'express'
 let app = express()
 
 app.listen(config.port, () => {
-    console.log(`Application is running on port: ${config.port}`)
+    console.log(`Application is running on port: http://localhost:${config.port}`)
 })
