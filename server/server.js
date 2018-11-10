@@ -1,6 +1,6 @@
 import config from './config'
 import cors from 'cors'
-import cryptojs from 'crypto-js'
+// import cryptojs from 'crypto-js'
 import jwt from 'jsonwebtoken'
 
 export default class Server {
@@ -17,8 +17,8 @@ export default class Server {
   }
 
   start() {
-    this.app.listen(config.port, () => {
-        console.log(`Application is running on port: http://localhost:${config.port}`)
+    this.app.listen(config.app.port, () => {
+      console.log(`Application is running on port: http://localhost:${config.app.port}/api/v1`)
     })
   }
 
