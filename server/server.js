@@ -4,6 +4,7 @@ import cors from 'cors'
 import logger from 'morgan'
 import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
+import Imap from './imap'
 
 export default class Server {
   constructor(app) {
@@ -42,7 +43,7 @@ export default class Server {
 
     this.start()
 
-    this.users = {}
+    this.usersImapConnection = {}
   }
 
   start() {
@@ -59,14 +60,24 @@ export default class Server {
     this.router.post('/login', (req, res) => {
       console.log(req.body) //used for debugging, delete it in end
       // this is used for decrepting password
-      // let bytes = cryptojs.AES.decrypt(req.body.password, 'secret key 123')
-      // let decreptedPassword = bytes.toString(cryptojs.enc.Utf8)
+      let bytes = cryptojs.AES.decrypt(req.body.password, 'secret key 123')
+      let decreptedPassword = bytes.toString(cryptojs.enc.Utf8)
       let token = jwt.sign(req.body, 'com.revancy.api')
 
-      this.users[token] = req.body
+      new Imap(req.body.login, decreptedPassword).connect()
+      .then(imap => this.usersImapConnection[token] = imap)
+
       res.send({
         token: token
       })
     })
+
+    this.router.get('/getHeaders', this.getHeaders)
+  }
+
+  getHeaders(req, res) {
+    let token = req.headers.token
+    this.usersImapConnection[token].getInboxHeaders(req.query.page)
+    .then(mails => res.send(mails))
   }
 }
