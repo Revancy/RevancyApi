@@ -34,10 +34,11 @@
     "crypto-js": "^3.1.9-1",
     "dotenv": "^6.1.0",
     "express": "^4.16.4",
+    "imap": "^0.8.19",
     "jsonwebtoken": "^8.3.0",
+    "mailparser": "^2.4.0",
     "mongoose": "^5.3.11",
     "morgan": "^1.9.1",
-    "imap": "^0.8.19",
-    "mailparser": "^2.4.0"
+    "nodemon": "^1.18.6"
   }
 }

@@ -1,6 +1,6 @@
 import config from './config'
 import cors from 'cors'
-// import cryptojs from 'crypto-js'
+import cryptojs from 'crypto-js'
 import logger from 'morgan'
 import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
@@ -65,14 +65,16 @@ export default class Server {
       let token = jwt.sign(req.body, 'com.revancy.api')
 
       new Imap(req.body.login, decreptedPassword).connect()
-      .then(imap => this.usersImapConnection[token] = imap)
+        .then(imap => this.usersImapConnection[token] = imap)
+
+      console.log(token)
 
       res.send({
         token: token
       })
     })
 
-    this.router.get('/getHeaders', this.getHeaders)
+    this.router.get('/getHeaders', this.getHeaders.bind(this))
   }
 
   getHeaders(req, res) {
