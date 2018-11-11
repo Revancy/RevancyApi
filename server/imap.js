@@ -58,22 +58,17 @@ export default class Imap {
   }
 
   onFetchMessage(msg, seqno) {
-    console.log('Message #%d', seqno)
     var prefix = '(#' + seqno + ') '
     msg.on('body', stream => {
       this.mailsParsers.push(this.simpleParser(stream))
     })
-    msg.once('end', () => {
-      console.log(prefix + 'Finished')
-    })
+    msg.once('end', () => {})
   }
 
   onFetchEnd() {
     Promise.all(this.mailsParsers).then(mails => {
-      console.log('******* All parsed ********')
       this.resolveFetch(mails)
     })
-    this.imap.end()
   }
 
   onError(error) {
