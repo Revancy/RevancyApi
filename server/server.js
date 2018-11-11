@@ -77,10 +77,15 @@ export default class Server {
   }
 
   getHeaders(req, res) {
-    let token = req.headers.token
-    this.usersImapConnection[token].getInboxHeaders(req.query.page)
-      .then(mails => {
-        res.send(new MessageMapper().toMessage(mails))
-      })
+    //let token = req.headers.token
+    new Imap(config.user.account, config.user.password).connect()
+      .then(imap => imap.getInboxHeaders(req.query.page)
+        .then(mails => {
+          res.send(new MessageMapper().toMessage(mails).reverse())
+        }))
+    // this.usersImapConnection[token].getInboxHeaders(req.query.page)
+    //   .then(mails => {
+    //     res.send(new MessageMapper().toMessage(mails))
+    //   })
   }
 }

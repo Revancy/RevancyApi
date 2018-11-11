@@ -15,6 +15,10 @@ const config = {
       useNewUrlParser: true,
       keepAlive: 120
     }
+  },
+  user: {
+    account: process.env.USER_ACCOUNT,
+    password: process.env.USER_PASSWORD
   }
 }
 
