@@ -5,6 +5,7 @@ import logger from 'morgan'
 import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
 import Imap from './imap'
+import MessageMapper from '../mappers/messageMapper'
 
 export default class Server {
   constructor(app) {
@@ -67,8 +68,6 @@ export default class Server {
       new Imap(req.body.login, decreptedPassword).connect()
         .then(imap => this.usersImapConnection[token] = imap)
 
-      console.log(token)
-
       res.send({
         token: token
       })
@@ -80,6 +79,8 @@ export default class Server {
   getHeaders(req, res) {
     let token = req.headers.token
     this.usersImapConnection[token].getInboxHeaders(req.query.page)
-    .then(mails => res.send(mails))
+      .then(mails => {
+        res.send(new MessageMapper().toMessage(mails))
+      })
   }
 }
