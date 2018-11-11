@@ -31,7 +31,7 @@ export default class Imap {
 
   connect() {
     this.imap.connect()
-    return Promise(resolve => {
+    return new Promise(resolve => {
       this.imap.once('ready', () => {
         console.log('Imap Connection Ready')
         resolve(this)
